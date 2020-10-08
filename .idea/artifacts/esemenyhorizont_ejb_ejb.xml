@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="ejb-jar" name="esemenyhorizont-ejb:ejb">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="esemenyhorizont-ejb-1.0.jar">
+      <element id="artifact" artifact-name="esemenyhorizont-ejb:ejb exploded" />
+    </root>
+  </artifact>
+</component>
