@@ -42,16 +42,14 @@ public class ActiveDirectory {
 
    public boolean login(String login, String password) throws NamingException {
       ResourceBundle props = ResourceBundle.getBundle("ldap");
-      Logger.getLogger("user123AD1245propos").log(Level.INFO, "ad {0}.", new Object[] { props});
 
       String ldapDomain = props.getString("ldapDomain");
       String ldapServer = props.getString("ldapServer");
       String securityGroup = props.getString("securityGroup");
-      Logger.getLogger("user123AD1245proposConn").log(Level.INFO, "ad {0}.",
+      Logger.getLogger("1").log(Level.INFO, "ad {0}.",
               new Object[] { login+"; "+ password+"; "+ ldapDomain+"; "+ ldapServer});
 
       LdapContext ADconn = this.getConnection(login, password, ldapDomain, ldapServer);
-      Logger.getLogger("ActiveDirectoryADconn").log(Level.INFO, "ad {0}.", new Object[] { ADconn});
       ActiveDirectory.User ADuser = this.getUser(login, ADconn);
       Logger.getLogger("ActiveDirectory123").log(Level.INFO, "ad {0}.", new Object[] { ADuser});
       Logger.getLogger("ActiveDirectory123ldapDomain").log(Level.INFO, "ad {0}.", new Object[] { ldapDomain});
@@ -87,25 +85,25 @@ public class ActiveDirectory {
       }
 
       Hashtable props = new Hashtable();
-      String principalName = username + "@" + domainName;
-      Logger.getLogger("ldapURL123userPrincipalName33PAss").log(Level.INFO, "ad {0}.", new Object[] { principalName});
+      String principalName = username + "@aeek.hu";
 
       props.put("java.naming.security.principal", principalName);
       if (password != null) {
          props.put("java.naming.security.credentials", password);
       }
 
-      String ldapURL = "ldap://" + (serverName == null ? domainName : serverName + "." + domainName) + '/'+"CN=karterites";
+      String ldapURL = "ldap://" + (serverName == null ? domainName : (serverName + "." + domainName));
       props.put("java.naming.factory.initial", "com.sun.jndi.ldap.LdapCtxFactory");
       props.put("java.naming.provider.url", ldapURL);
-      Logger.getLogger("ldapURL123").log(Level.INFO, "ad {0}.", new Object[] { ldapURL});
+      Logger.getLogger("2").log(Level.INFO, "ad {0}.", new Object[] { props});
 
       try {
          return new InitialLdapContext(props, (Control[])null);
       } catch (Exception e) {
-         Logger.getLogger("ldapURL123555").log(Level.INFO, "ad {0}.", new Object[] { e});
+         e.printStackTrace();
+         Logger.getLogger("3").log(Level.INFO, "ad {0}.", new Object[] {  e });
       }
-      Logger.getLogger("ldapURL12355544").log(Level.INFO, "ad {0}.", new Object[] { ldapURL});
+      Logger.getLogger("4").log(Level.INFO, "ad {0}.", new Object[] { ldapURL});
       return new InitialLdapContext(props, (Control[])null);
    }
 
@@ -113,24 +111,23 @@ public class ActiveDirectory {
       try {
          String domainName = null;
          String authenticatedUser;
-         Logger.getLogger("ldapURL123username").log(Level.INFO, "ad {0}.", new Object[] { username});
 
          if (username.contains("@")) {
             username = username.substring(0, username.indexOf("@"));
             domainName = username.substring(username.indexOf("@") + 1);
-            Logger.getLogger("ldapURL123username12").log(Level.INFO, "ad {0}.", new Object[] { domainName});
+            Logger.getLogger("5").log(Level.INFO, "ad {0}.", new Object[] { domainName});
 
          } else if (username.contains("\\")) {
             username = username.substring(0, username.indexOf("\\"));
             domainName = username.substring(username.indexOf("\\") + 1);
-            Logger.getLogger("ldapURL123username123").log(Level.INFO, "ad {0}.", new Object[] { username+" "+domainName});
+            Logger.getLogger("6").log(Level.INFO, "ad {0}.", new Object[] { username+" "+domainName});
 
          } else {
             authenticatedUser = (String)context.getEnvironment().get("java.naming.security.principal");
-            Logger.getLogger("ldapURL123authenticatedUser").log(Level.INFO, "ad {0}.", new Object[] { authenticatedUser});
+            Logger.getLogger("7").log(Level.INFO, "ad {0}.", new Object[] { authenticatedUser});
             if (authenticatedUser.contains("@")) {
                domainName = authenticatedUser.substring(authenticatedUser.indexOf("@") + 1);
-               Logger.getLogger("ldapURL123authenticatedUser1").log(Level.INFO, "ad {0}.", new Object[] { authenticatedUser});
+               Logger.getLogger("8").log(Level.INFO, "ad {0}.", new Object[] { authenticatedUser});
 
             }
          }
@@ -140,18 +137,28 @@ public class ActiveDirectory {
             SearchControls controls = new SearchControls();
             controls.setSearchScope(2);
             controls.setReturningAttributes(this.userAttributes);
-            Logger.getLogger("ldapURL123userAttributes").log(Level.INFO, "ad {0}.", new Object[] { this.userAttributes});
+
+            if(this.userAttributes!= null && this.userAttributes.length>0){
+               for(int i = 0; i<this.userAttributes.length; i++){
+                  Logger.getLogger("9.1").log(Level.INFO, "ad {0}.", new Object[] { this.userAttributes[i]});
+               }
+            }
+            Logger.getLogger("9.2").log(Level.INFO, "ad {0}.", new Object[] { this.toDC(domainName)});
+            Logger.getLogger("9.3").log(Level.INFO, "ad {0}.", new Object[] { authenticatedUser});
 
             NamingEnumeration<SearchResult> answer = context.search(this.toDC(domainName), "(& (userPrincipalName=" + authenticatedUser + ")(objectClass=user))", controls);
-            Logger.getLogger("ldapURL123authenticatedUser12").log(Level.INFO, "ad {0}.", new Object[] { answer});
+            Logger.getLogger("9.5").log(Level.INFO, "ad {0}.", new Object[] { answer.next().getAttributes()});
+
+            while(answer.hasMore()){
+               Logger.getLogger("10").log(Level.INFO, "ad {0}.", new Object[] { answer.next().getAttributes()});
+            }
 
             if (answer.hasMore()) {
                Attributes attr = ((SearchResult)answer.next()).getAttributes();
                Attribute user = attr.get("userPrincipalName");
-               Logger.getLogger("ldapURL123userPrincipalName").log(Level.INFO, "ad {0}.", new Object[] { user});
 
                if (user != null) {
-                  Logger.getLogger("ldapURL123userPrincipalName23").log(Level.INFO, "ad {0}.", new Object[] { user});
+                  Logger.getLogger("11").log(Level.INFO, "ad {0}.", new Object[] { user});
                   return new ActiveDirectory.User(attr);
                }
             }
